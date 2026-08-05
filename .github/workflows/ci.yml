@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build and run ring buffer tests
+        run: |
+          gcc tests/test_ring_buffer.c tests/unity/unity.c src/ring_buffer.c \
+            -Iinclude -Itests/unity \
+            -o test_ring_buffer -Wall -Wextra -Werror
+          ./test_ring_buffer
+
+      - name: Build and run packet parser tests
+        run: |
+          gcc tests/test_packet_parser.c tests/unity/unity.c src/packet_parser.c \
+            -Iinclude -Itests/unity \
+            -o test_packet_parser -Wall -Wextra -Werror
+          ./test_packet_parser
