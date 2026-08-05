@@ -1,4 +1,4 @@
-# Design Decisions & Trade-offs
+# Design Decisions & Trade-offs #
 
 **Fixed-size buffers, no dynamic allocation**
 Embedded firmware avoids heap allocation to prevent fragmentation and keep
