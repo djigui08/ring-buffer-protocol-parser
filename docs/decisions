@@ -1,0 +1,26 @@
+# Design Decisions & Trade-offs
+
+**Fixed-size buffers, no dynamic allocation**
+Embedded firmware avoids heap allocation to prevent fragmentation and keep
+memory usage deterministic. Enforcing that constraint here, even on a host
+machine, means this code ports to the ESP32 without redesign.
+
+**1-byte length field (max 255-byte payload)**
+Chosen over a 2-byte length for v1: it keeps the entire length space
+exhaustively testable and keeps the parser simpler to reason about. A
+2-byte length is a straightforward future extension if payloads need to
+exceed 255 bytes.
+
+**Not thread-safe (v1)**
+Both modules assume single-producer, single-consumer usage. This is
+intentional scope control — thread safety matters most once these modules
+run as separate FreeRTOS tasks, at which point queues/mutexes are the
+right tool, not ad-hoc locking inside the library itself. Revisit when
+integrating into the ESP32 project.
+
+**Explicit `bool`/enum return values instead of silent failure**
+`ring_buffer_push` returns `false` on overflow instead of overwriting
+data; `parser_process_byte` distinguishes "in progress" from "checksum
+failed" instead of collapsing both into a boolean. Both choices trade a
+little caller-side verbosity for making failure states impossible to
+ignore accidentally.
